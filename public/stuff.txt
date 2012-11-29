@@ -1,0 +1,2 @@
+docelowaProdukcja = 1e+05
+

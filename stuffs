@@ -1,0 +1,1677 @@
+# Logfile created on 2012-11-28 22:55:50 +0100 by logger.rb/31641
+0
+0
+5
+0
+300
+20
+15
+20
+5000
+8000
+18000
+5000
+15000
+0
+0
+5
+0
+300
+20
+15
+20
+5000
+8000
+18000
+5000
+15000
+{"a"=>["50", "0", "5", "0"], "r"=>["300", "20", "15", "20"], "wspolczynnikReklamy"=>"0.3", "procentPopytu"=>"0.2", "celReklamy"=>["5000", "8000", "18000"], "eps"=>"0.01", "beta"=>"0.001", "gamma"=>"1000", "gotowka"=>"400000", "kredyt"=>"200000", "splacanaRata"=>"50000", "jakosc"=>"3", "kosztJednostkowy"=>"7.68", "cenaSprzedazy"=>"15", "popyt"=>"500000", "N"=>"1", "kosztyStale"=>["5000", "15000"], "zdolnoscProdukcyjna"=>"400000", "amortyzacja"=>"10000"}
+4
+4
+3
+a: 4
+r: 4
+wspolczynnikReklamy: 3
+a: 4, ["0", "0", "5", "0"]
+r: 4, ["300", "20", "15", "20"]
+wspolczynnikReklamy: 3, 0.3
+
+stuffs
+param N;
+
+param kosztyStale {1..2};
+param zdolnoscProdukcyjna {1..N};
+param amortyzacja;
+
+param gotowka;
+param kredyt;
+param splacanaRata;
+param jakosc {1..N};
+param kosztJednostkowy{1..N};
+param cenaSprzedazy {1..N};
+param popyt;
+
+param procentPopytu;
+param wspolczynnikReklamy;
+param celReklamy{1..3};
+
+
+param eps;
+param beta;
+param gamma;
+
+param a{1..4};
+param r{1..4};
+
+var wielkoscProdukcji {1..N} integer >= 0;
+var promocjaInternet {1..N} integer >= 0;
+var promocjaMagazyny {1..N} integer >= 0;
+var promocjaTelewizja {1..N} integer >= 0;
+
+var kosztyReklamy >= 0;
+var kosztyZmienne >= 0;
+var wolnaGotowka >= 0;
+var docelowaProdukcja >= 0;
+
+var zz;
+var z{1..4};
+var k{1..4};
+var dp{1..3} >= 0;
+var dm{1..3} >= 0;
+var d2p >= 0;
+var d2m >= 0;
+var alfa;
+
+maximize ss: zz  + eps * z[1] + eps * z[2] + eps * z[3] + eps * z[4];
+
+subject to bankructwo: wolnaGotowka >= 0;
+subject to reklamaDoProdukcji: kosztyReklamy <= wspolczynnikReklamy * kosztyZmienne;
+subject to wydajnoscFabryk{i in 1..N}: wielkoscProdukcji[i] <= zdolnoscProdukcyjna[i]; 
+
+subject to o1{i in 1..4}: z[i]<= 1 + beta * (k[i] - a[i]) / (a[i] - r[i]);
+subject to o2{i in 1..4}: z[i]<= (k[i] - r[i]) / (a[i] - r[i]);
+subject to o3{i in 1..4}: z[i]<= gamma * (k[i]- r[i]) / (a[i] - r[i]);
+subject to o4{i in 1..4}: zz<= z[i];
+
+subject to kosztyReklamyO: kosztyReklamy = sum{i in 1..N} promocjaInternet[i] + sum{i in 1..N} promocjaMagazyny[i] + sum{i in 1..N} promocjaTelewizja[i];
+subject to kosztyZmienneO: kosztyZmienne = sum{i in 1..N} wielkoscProdukcji[i] * kosztJednostkowy[i];
+subject to wolnaGotowkaO: wolnaGotowka = gotowka + kredyt - splacanaRata - amortyzacja - kosztyReklamy - kosztyStale[1] - kosztyStale[2] - kosztyZmienne;
+subject to docelowaProdukcjaO: docelowaProdukcja = popyt * procentPopytu;
+
+subject to al1{i in 1..3}: alfa >= dp[i];
+subject to al2{i in 1..3}: alfa >= dm[i];
+
+subject to odchylka1{i in 1..N}: promocjaInternet[i] - celReklamy[1] + celReklamy[1] * 0.01 * (dm[1] - dp[1]) = 0;
+subject to odchylka2{i in 1..N}: promocjaMagazyny[i] - celReklamy[2] + celReklamy[2] * 0.01 * (dm[2] - dp[2]) = 0;
+subject to odchylka3{i in 1..N}: promocjaTelewizja[i] - celReklamy[3] + celReklamy[3] * 0.01 * (dm[3] - dp[3]) = 0;
+subject to odchtlka4: wielkoscProdukcji[1] - docelowaProdukcja + docelowaProdukcja * 0.01 * (d2m - d2p) = 0;
+
+subject to val1: k[1] = wolnaGotowka;
+subject to val2: k[2] = d2p + d2m;
+subject to val3: k[3] = sum{i in 1..3} (dp[i]+dm[i]);
+subject to val4: k[4] = alfa;
+data;
+
+param a:=
+0 50
+1 0
+2 5
+3 0;
+
+param r:=
+0 300
+1 20
+2 15
+3 20;
+
+param wspolczynnikReklamy:=0;
+param procentPopytu:=0;
+param celReklamy:=
+0 5000
+1 8000
+2 18000;
+param eps:=0;
+param beta:=0;
+param gamma:=1;
+
+param gotowka:=4;
+param kredyt:=2;
+param splacanaRata:=5;
+param jakosc:=
+1 3;
+param kosztJednostkowy:=
+1 7.68;
+param cenaSprzedazy:=
+1 15;
+param popyt:=5;
+
+param N:=1;
+param kosztyStale:=
+0 5000
+1 15000;
+param zdolnoscProdukcyjna:=
+1 400000;
+param amortyzacja:=1;
+
+
+
+# do modelu podajemy: jakosc, ceneSprzedazy, aktualny stan konta i koszt jednostkowy
+# uwzgl?dni? prognozy rynku przy ograniczeniach na wielkoscProdukcji
+# minimalizujemy ilosc wolnej gotowki
+
+# metoda punktu odniesienia marketing vs wielkosc produkcji (Marek)
+
+solve;
+display docelowaProdukcja;
+
+
+param N;
+
+param kosztyStale {1..2};
+param zdolnoscProdukcyjna {1..N};
+param amortyzacja;
+
+param gotowka;
+param kredyt;
+param splacanaRata;
+param jakosc {1..N};
+param kosztJednostkowy{1..N};
+param cenaSprzedazy {1..N};
+param popyt;
+
+param procentPopytu;
+param wspolczynnikReklamy;
+param celReklamy{1..3};
+
+
+param eps;
+param beta;
+param gamma;
+
+param a{1..4};
+param r{1..4};
+
+var wielkoscProdukcji {1..N} integer >= 0;
+var promocjaInternet {1..N} integer >= 0;
+var promocjaMagazyny {1..N} integer >= 0;
+var promocjaTelewizja {1..N} integer >= 0;
+
+var kosztyReklamy >= 0;
+var kosztyZmienne >= 0;
+var wolnaGotowka >= 0;
+var docelowaProdukcja >= 0;
+
+var zz;
+var z{1..4};
+var k{1..4};
+var dp{1..3} >= 0;
+var dm{1..3} >= 0;
+var d2p >= 0;
+var d2m >= 0;
+var alfa;
+
+maximize ss: zz  + eps * z[1] + eps * z[2] + eps * z[3] + eps * z[4];
+
+subject to bankructwo: wolnaGotowka >= 0;
+subject to reklamaDoProdukcji: kosztyReklamy <= wspolczynnikReklamy * kosztyZmienne;
+subject to wydajnoscFabryk{i in 1..N}: wielkoscProdukcji[i] <= zdolnoscProdukcyjna[i]; 
+
+subject to o1{i in 1..4}: z[i]<= 1 + beta * (k[i] - a[i]) / (a[i] - r[i]);
+subject to o2{i in 1..4}: z[i]<= (k[i] - r[i]) / (a[i] - r[i]);
+subject to o3{i in 1..4}: z[i]<= gamma * (k[i]- r[i]) / (a[i] - r[i]);
+subject to o4{i in 1..4}: zz<= z[i];
+
+subject to kosztyReklamyO: kosztyReklamy = sum{i in 1..N} promocjaInternet[i] + sum{i in 1..N} promocjaMagazyny[i] + sum{i in 1..N} promocjaTelewizja[i];
+subject to kosztyZmienneO: kosztyZmienne = sum{i in 1..N} wielkoscProdukcji[i] * kosztJednostkowy[i];
+subject to wolnaGotowkaO: wolnaGotowka = gotowka + kredyt - splacanaRata - amortyzacja - kosztyReklamy - kosztyStale[1] - kosztyStale[2] - kosztyZmienne;
+subject to docelowaProdukcjaO: docelowaProdukcja = popyt * procentPopytu;
+
+subject to al1{i in 1..3}: alfa >= dp[i];
+subject to al2{i in 1..3}: alfa >= dm[i];
+
+subject to odchylka1{i in 1..N}: promocjaInternet[i] - celReklamy[1] + celReklamy[1] * 0.01 * (dm[1] - dp[1]) = 0;
+subject to odchylka2{i in 1..N}: promocjaMagazyny[i] - celReklamy[2] + celReklamy[2] * 0.01 * (dm[2] - dp[2]) = 0;
+subject to odchylka3{i in 1..N}: promocjaTelewizja[i] - celReklamy[3] + celReklamy[3] * 0.01 * (dm[3] - dp[3]) = 0;
+subject to odchtlka4: wielkoscProdukcji[1] - docelowaProdukcja + docelowaProdukcja * 0.01 * (d2m - d2p) = 0;
+
+subject to val1: k[1] = wolnaGotowka;
+subject to val2: k[2] = d2p + d2m;
+subject to val3: k[3] = sum{i in 1..3} (dp[i]+dm[i]);
+subject to val4: k[4] = alfa;
+data;
+
+param a:=
+1 50
+2 0
+3 5
+4 0;
+
+param r:=
+1 300
+2 20
+3 15
+4 20;
+
+param wspolczynnikReklamy:=0;
+param procentPopytu:=0;
+param celReklamy:=
+1 5000
+2 8000
+3 18000;
+param eps:=0;
+param beta:=0;
+param gamma:=1;
+
+param gotowka:=4;
+param kredyt:=2;
+param splacanaRata:=5;
+param jakosc:=
+1 3;
+param kosztJednostkowy:=
+1 7.68;
+param cenaSprzedazy:=
+1 15;
+param popyt:=5;
+
+param N:=1;
+param kosztyStale:=
+1 5000
+2 15000;
+param zdolnoscProdukcyjna:=
+1 400000;
+param amortyzacja:=1;
+
+
+
+# do modelu podajemy: jakosc, ceneSprzedazy, aktualny stan konta i koszt jednostkowy
+# uwzgl?dni? prognozy rynku przy ograniczeniach na wielkoscProdukcji
+# minimalizujemy ilosc wolnej gotowki
+
+# metoda punktu odniesienia marketing vs wielkosc produkcji (Marek)
+
+solve;
+display docelowaProdukcja;
+
+
+
+
+
+param N;
+
+param kosztyStale {1..2};
+param zdolnoscProdukcyjna {1..N};
+param amortyzacja;
+
+param gotowka;
+param kredyt;
+param splacanaRata;
+param jakosc {1..N};
+param kosztJednostkowy{1..N};
+param cenaSprzedazy {1..N};
+param popyt;
+
+param procentPopytu;
+param wspolczynnikReklamy;
+param celReklamy{1..3};
+
+
+param eps;
+param beta;
+param gamma;
+
+param a{1..4};
+param r{1..4};
+
+var wielkoscProdukcji {1..N} integer >= 0;
+var promocjaInternet {1..N} integer >= 0;
+var promocjaMagazyny {1..N} integer >= 0;
+var promocjaTelewizja {1..N} integer >= 0;
+
+var kosztyReklamy >= 0;
+var kosztyZmienne >= 0;
+var wolnaGotowka >= 0;
+var docelowaProdukcja >= 0;
+
+var zz;
+var z{1..4};
+var k{1..4};
+var dp{1..3} >= 0;
+var dm{1..3} >= 0;
+var d2p >= 0;
+var d2m >= 0;
+var alfa;
+
+maximize ss: zz  + eps * z[1] + eps * z[2] + eps * z[3] + eps * z[4];
+
+subject to bankructwo: wolnaGotowka >= 0;
+subject to reklamaDoProdukcji: kosztyReklamy <= wspolczynnikReklamy * kosztyZmienne;
+subject to wydajnoscFabryk{i in 1..N}: wielkoscProdukcji[i] <= zdolnoscProdukcyjna[i]; 
+
+subject to o1{i in 1..4}: z[i]<= 1 + beta * (k[i] - a[i]) / (a[i] - r[i]);
+subject to o2{i in 1..4}: z[i]<= (k[i] - r[i]) / (a[i] - r[i]);
+subject to o3{i in 1..4}: z[i]<= gamma * (k[i]- r[i]) / (a[i] - r[i]);
+subject to o4{i in 1..4}: zz<= z[i];
+
+subject to kosztyReklamyO: kosztyReklamy = sum{i in 1..N} promocjaInternet[i] + sum{i in 1..N} promocjaMagazyny[i] + sum{i in 1..N} promocjaTelewizja[i];
+subject to kosztyZmienneO: kosztyZmienne = sum{i in 1..N} wielkoscProdukcji[i] * kosztJednostkowy[i];
+subject to wolnaGotowkaO: wolnaGotowka = gotowka + kredyt - splacanaRata - amortyzacja - kosztyReklamy - kosztyStale[1] - kosztyStale[2] - kosztyZmienne;
+subject to docelowaProdukcjaO: docelowaProdukcja = popyt * procentPopytu;
+
+subject to al1{i in 1..3}: alfa >= dp[i];
+subject to al2{i in 1..3}: alfa >= dm[i];
+
+subject to odchylka1{i in 1..N}: promocjaInternet[i] - celReklamy[1] + celReklamy[1] * 0.01 * (dm[1] - dp[1]) = 0;
+subject to odchylka2{i in 1..N}: promocjaMagazyny[i] - celReklamy[2] + celReklamy[2] * 0.01 * (dm[2] - dp[2]) = 0;
+subject to odchylka3{i in 1..N}: promocjaTelewizja[i] - celReklamy[3] + celReklamy[3] * 0.01 * (dm[3] - dp[3]) = 0;
+subject to odchtlka4: wielkoscProdukcji[1] - docelowaProdukcja + docelowaProdukcja * 0.01 * (d2m - d2p) = 0;
+
+subject to val1: k[1] = wolnaGotowka;
+subject to val2: k[2] = d2p + d2m;
+subject to val3: k[3] = sum{i in 1..3} (dp[i]+dm[i]);
+subject to val4: k[4] = alfa;
+data;
+
+param a:=
+1 0
+2 0
+3 5
+4 0;
+
+param r:=
+1 300
+2 20
+3 15
+4 20;
+
+param wspolczynnikReklamy:=0;
+param procentPopytu:=0;
+param celReklamy:=
+1 5000
+2 8000
+3 18000;
+param eps:=0;
+param beta:=0;
+param gamma:=1;
+
+param gotowka:=4;
+param kredyt:=2;
+param splacanaRata:=5;
+param jakosc:=
+1 3;
+param kosztJednostkowy:=
+1 7.68;
+param cenaSprzedazy:=
+1 15;
+param popyt:=5;
+
+param N:=1;
+param kosztyStale:=
+1 5000
+2 1500;
+param zdolnoscProdukcyjna:=
+1 400000;
+param amortyzacja:=1;
+
+
+
+# do modelu podajemy: jakosc, ceneSprzedazy, aktualny stan konta i koszt jednostkowy
+# uwzgl?dni? prognozy rynku przy ograniczeniach na wielkoscProdukcji
+# minimalizujemy ilosc wolnej gotowki
+
+# metoda punktu odniesienia marketing vs wielkosc produkcji (Marek)
+
+solve;
+display docelowaProdukcja;
+
+
+{"a"=>["0", "0", "5", "0"], "r"=>["300", "20", "15", "20"], "wspolczynnikReklamy"=>"0.3", "procentPopytu"=>"0.2", "celReklamy"=>["5000", "8000", "18000"], "eps"=>"0.01", "beta"=>"0.001", "gamma"=>"1000", "gotowka"=>"400000", "kredyt"=>"200000", "splacanaRata"=>"50000", "jakosc"=>"3", "kosztJednostkowy"=>"7.68", "cenaSprzedazy"=>"15", "popyt"=>"500000", "N"=>"1", "kosztyStale"=>["5000", "15000"], "zdolnoscProdukcyjna"=>"400000", "amortyzacja"=>"10000"}
+param N;
+
+param kosztyStale {1..2};
+param zdolnoscProdukcyjna {1..N};
+param amortyzacja;
+
+param gotowka;
+param kredyt;
+param splacanaRata;
+param jakosc {1..N};
+param kosztJednostkowy{1..N};
+param cenaSprzedazy {1..N};
+param popyt;
+
+param procentPopytu;
+param wspolczynnikReklamy;
+param celReklamy{1..3};
+
+
+param eps;
+param beta;
+param gamma;
+
+param a{1..4};
+param r{1..4};
+
+var wielkoscProdukcji {1..N} integer >= 0;
+var promocjaInternet {1..N} integer >= 0;
+var promocjaMagazyny {1..N} integer >= 0;
+var promocjaTelewizja {1..N} integer >= 0;
+
+var kosztyReklamy >= 0;
+var kosztyZmienne >= 0;
+var wolnaGotowka >= 0;
+var docelowaProdukcja >= 0;
+
+var zz;
+var z{1..4};
+var k{1..4};
+var dp{1..3} >= 0;
+var dm{1..3} >= 0;
+var d2p >= 0;
+var d2m >= 0;
+var alfa;
+
+maximize ss: zz  + eps * z[1] + eps * z[2] + eps * z[3] + eps * z[4];
+
+subject to bankructwo: wolnaGotowka >= 0;
+subject to reklamaDoProdukcji: kosztyReklamy <= wspolczynnikReklamy * kosztyZmienne;
+subject to wydajnoscFabryk{i in 1..N}: wielkoscProdukcji[i] <= zdolnoscProdukcyjna[i]; 
+
+subject to o1{i in 1..4}: z[i]<= 1 + beta * (k[i] - a[i]) / (a[i] - r[i]);
+subject to o2{i in 1..4}: z[i]<= (k[i] - r[i]) / (a[i] - r[i]);
+subject to o3{i in 1..4}: z[i]<= gamma * (k[i]- r[i]) / (a[i] - r[i]);
+subject to o4{i in 1..4}: zz<= z[i];
+
+subject to kosztyReklamyO: kosztyReklamy = sum{i in 1..N} promocjaInternet[i] + sum{i in 1..N} promocjaMagazyny[i] + sum{i in 1..N} promocjaTelewizja[i];
+subject to kosztyZmienneO: kosztyZmienne = sum{i in 1..N} wielkoscProdukcji[i] * kosztJednostkowy[i];
+subject to wolnaGotowkaO: wolnaGotowka = gotowka + kredyt - splacanaRata - amortyzacja - kosztyReklamy - kosztyStale[1] - kosztyStale[2] - kosztyZmienne;
+subject to docelowaProdukcjaO: docelowaProdukcja = popyt * procentPopytu;
+
+subject to al1{i in 1..3}: alfa >= dp[i];
+subject to al2{i in 1..3}: alfa >= dm[i];
+
+subject to odchylka1{i in 1..N}: promocjaInternet[i] - celReklamy[1] + celReklamy[1] * 0.01 * (dm[1] - dp[1]) = 0;
+subject to odchylka2{i in 1..N}: promocjaMagazyny[i] - celReklamy[2] + celReklamy[2] * 0.01 * (dm[2] - dp[2]) = 0;
+subject to odchylka3{i in 1..N}: promocjaTelewizja[i] - celReklamy[3] + celReklamy[3] * 0.01 * (dm[3] - dp[3]) = 0;
+subject to odchtlka4: wielkoscProdukcji[1] - docelowaProdukcja + docelowaProdukcja * 0.01 * (d2m - d2p) = 0;
+
+subject to val1: k[1] = wolnaGotowka;
+subject to val2: k[2] = d2p + d2m;
+subject to val3: k[3] = sum{i in 1..3} (dp[i]+dm[i]);
+subject to val4: k[4] = alfa;
+data;
+
+param a:=
+1 0
+2 0
+3 5
+4 0;
+
+param r:=
+1 300
+2 20
+3 15
+4 20;
+
+param wspolczynnikReklamy:=0;
+param procentPopytu:=0;
+param celReklamy:=
+1 5000
+2 8000
+3 18000;
+param eps:=0;
+param beta:=0;
+param gamma:=1;
+
+param gotowka:=4;
+param kredyt:=2;
+param splacanaRata:=5;
+param jakosc:=
+1 3;
+param kosztJednostkowy:=
+1 7.68;
+param cenaSprzedazy:=
+1 15;
+param popyt:=5;
+
+param N:=1;
+param kosztyStale:=
+1 5000
+2 15000;
+param zdolnoscProdukcyjna:=
+1 400000;
+param amortyzacja:=1;
+
+
+
+# do modelu podajemy: jakosc, ceneSprzedazy, aktualny stan konta i koszt jednostkowy
+# uwzgl?dni? prognozy rynku przy ograniczeniach na wielkoscProdukcji
+# minimalizujemy ilosc wolnej gotowki
+
+# metoda punktu odniesienia marketing vs wielkosc produkcji (Marek)
+
+solve;
+display docelowaProdukcja;
+
+
+param N;
+
+param kosztyStale {1..2};
+param zdolnoscProdukcyjna {1..N};
+param amortyzacja;
+
+param gotowka;
+param kredyt;
+param splacanaRata;
+param jakosc {1..N};
+param kosztJednostkowy{1..N};
+param cenaSprzedazy {1..N};
+param popyt;
+
+param procentPopytu;
+param wspolczynnikReklamy;
+param celReklamy{1..3};
+
+
+param eps;
+param beta;
+param gamma;
+
+param a{1..4};
+param r{1..4};
+
+var wielkoscProdukcji {1..N} integer >= 0;
+var promocjaInternet {1..N} integer >= 0;
+var promocjaMagazyny {1..N} integer >= 0;
+var promocjaTelewizja {1..N} integer >= 0;
+
+var kosztyReklamy >= 0;
+var kosztyZmienne >= 0;
+var wolnaGotowka >= 0;
+var docelowaProdukcja >= 0;
+
+var zz;
+var z{1..4};
+var k{1..4};
+var dp{1..3} >= 0;
+var dm{1..3} >= 0;
+var d2p >= 0;
+var d2m >= 0;
+var alfa;
+
+maximize ss: zz  + eps * z[1] + eps * z[2] + eps * z[3] + eps * z[4];
+
+subject to bankructwo: wolnaGotowka >= 0;
+subject to reklamaDoProdukcji: kosztyReklamy <= wspolczynnikReklamy * kosztyZmienne;
+subject to wydajnoscFabryk{i in 1..N}: wielkoscProdukcji[i] <= zdolnoscProdukcyjna[i]; 
+
+subject to o1{i in 1..4}: z[i]<= 1 + beta * (k[i] - a[i]) / (a[i] - r[i]);
+subject to o2{i in 1..4}: z[i]<= (k[i] - r[i]) / (a[i] - r[i]);
+subject to o3{i in 1..4}: z[i]<= gamma * (k[i]- r[i]) / (a[i] - r[i]);
+subject to o4{i in 1..4}: zz<= z[i];
+
+subject to kosztyReklamyO: kosztyReklamy = sum{i in 1..N} promocjaInternet[i] + sum{i in 1..N} promocjaMagazyny[i] + sum{i in 1..N} promocjaTelewizja[i];
+subject to kosztyZmienneO: kosztyZmienne = sum{i in 1..N} wielkoscProdukcji[i] * kosztJednostkowy[i];
+subject to wolnaGotowkaO: wolnaGotowka = gotowka + kredyt - splacanaRata - amortyzacja - kosztyReklamy - kosztyStale[1] - kosztyStale[2] - kosztyZmienne;
+subject to docelowaProdukcjaO: docelowaProdukcja = popyt * procentPopytu;
+
+subject to al1{i in 1..3}: alfa >= dp[i];
+subject to al2{i in 1..3}: alfa >= dm[i];
+
+subject to odchylka1{i in 1..N}: promocjaInternet[i] - celReklamy[1] + celReklamy[1] * 0.01 * (dm[1] - dp[1]) = 0;
+subject to odchylka2{i in 1..N}: promocjaMagazyny[i] - celReklamy[2] + celReklamy[2] * 0.01 * (dm[2] - dp[2]) = 0;
+subject to odchylka3{i in 1..N}: promocjaTelewizja[i] - celReklamy[3] + celReklamy[3] * 0.01 * (dm[3] - dp[3]) = 0;
+subject to odchtlka4: wielkoscProdukcji[1] - docelowaProdukcja + docelowaProdukcja * 0.01 * (d2m - d2p) = 0;
+
+subject to val1: k[1] = wolnaGotowka;
+subject to val2: k[2] = d2p + d2m;
+subject to val3: k[3] = sum{i in 1..3} (dp[i]+dm[i]);
+subject to val4: k[4] = alfa;
+data;
+
+param a:=
+1 5
+2 0
+3 5
+4 0;
+
+param r:=
+1 300
+2 20
+3 15
+4 20;
+
+param wspolczynnikReklamy:=0.3;
+param procentPopytu:=0.2;
+param celReklamy:=
+1 5000
+2 8000
+3 18000;
+param eps:=0.01;
+param beta:=0.001;
+param gamma:=1000;
+
+param gotowka:=400000;
+param kredyt:=200000;
+param splacanaRata:=50000;
+param jakosc:=
+1 3;
+param kosztJednostkowy:=
+1 7.68;
+param cenaSprzedazy:=
+1 15;
+param popyt:=500000;
+
+param N:=1;
+param kosztyStale:=
+1 5000
+2 15000;
+param zdolnoscProdukcyjna:=
+1 400000;
+param amortyzacja:=10000;
+
+
+
+# do modelu podajemy: jakosc, ceneSprzedazy, aktualny stan konta i koszt jednostkowy
+# uwzgl?dni? prognozy rynku przy ograniczeniach na wielkoscProdukcji
+# minimalizujemy ilosc wolnej gotowki
+
+# metoda punktu odniesienia marketing vs wielkosc produkcji (Marek)
+
+solve;
+display docelowaProdukcja;
+
+
+
+docelowaProdukcja = 1e+05
+
+Cannot find "minos"
+
+docelowaProdukcja = 1e+05
+
+Cannot find "minos"
+
+docelowaProdukcja = 1e+05
+
+Cannot find "minos"
+
+docelowaProdukcja = 1e+05
+
+Cannot find "minos"
+
+docelowaProdukcja = 1e+05
+
+Cannot find "minos"
+
+docelowaProdukcja = 1e+05
+
+Cannot find "minos"
+
+Cannot invoke /home/jg/ampl/minos: No such file or directory
+exit code 4
+<BREAK>
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+16 iterations, objective -805.8884355
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+16 iterations, objective -805.8884355
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+16 iterations, objective -805.8884351
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+16 iterations, objective -805.8884355
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884375
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884373
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884373
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884375
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884373
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884375
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884374
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884374
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884373
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884373
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884373
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884372
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -812.463958
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -812.4639583
+docelowaProdukcja = 1e+05
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+17 iterations, objective -805.8884372
+docelowaProdukcja = 1e+05
+
+k [*] :=
+1  -3.33067e-11
+2  35.8594
+3  20
+4  20
+;
+
+wielkoscProdukcji [*] :=
+1  64140.6
+;
+
+promocjaInternet [*] :=
+1  5000
+;
+
+promocjaMagazyny [*] :=
+1  8000
+;
+
+promocjaTelewizja [*] :=
+1  14400
+;
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+32 iterations, objective 0.7883412015
+docelowaProdukcja = 162840
+
+k [*] :=
+1   4.19109e-10
+2  24.9167
+3  -1.29969e-14
+4  -1.29969e-14
+;
+
+wielkoscProdukcji [*] :=
+1  122266
+;
+
+promocjaInternet [*] :=
+1  5000
+;
+
+promocjaMagazyny [*] :=
+1  8000
+;
+
+promocjaTelewizja [*] :=
+1  18000
+;
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+32 iterations, objective -1424.538692
+docelowaProdukcja = 162840
+
+k [*] :=
+1    2.22045e-10
+2   23.8306
+3  119.153
+4   47.6611
+;
+
+wielkoscProdukcji [*] :=
+1  124034
+;
+
+promocjaInternet [*] :=
+1  3808.47
+;
+
+promocjaMagazyny [*] :=
+1  4187.11
+;
+
+promocjaTelewizja [*] :=
+1  9420.99
+;
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+20 iterations, objective -1424.538692
+docelowaProdukcja = 162840
+
+k [*] :=
+1   -1.44329e-10
+2   23.8306
+3  119.153
+4   47.6611
+;
+
+wielkoscProdukcji [*] :=
+1  124034
+;
+
+promocjaInternet [*] :=
+1  3808.47
+;
+
+promocjaMagazyny [*] :=
+1  4187.11
+;
+
+promocjaTelewizja [*] :=
+1  9420.99
+;
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+20 iterations, objective -1424.538692
+docelowaProdukcja = 162840
+
+k [*] :=
+1   -1.44329e-10
+2   23.8306
+3  119.153
+4   47.6611
+;
+
+wielkoscProdukcji [*] :=
+1  124034
+;
+
+promocjaInternet [*] :=
+1  3808.47
+;
+
+promocjaMagazyny [*] :=
+1  4187.11
+;
+
+promocjaTelewizja [*] :=
+1  9420.99
+;
+
+kosztyZmienne = 952583
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -1498.363327
+docelowaProdukcja = 162840
+
+k [*] :=
+1    1.11022e-11
+2   24.5473
+3  122.737
+4   49.0946
+;
+
+wielkoscProdukcji [*] :=
+1  122867
+;
+
+promocjaInternet [*] :=
+1  6108.64
+;
+
+promocjaMagazyny [*] :=
+1  7545.27
+;
+
+promocjaTelewizja [*] :=
+1  12726.3
+;
+
+kosztyZmienne = 943620
+
+
+Error executing "solve" command:
+error processing constraint o1[2]:
+	can't compute -1/0
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -21742.34419
+docelowaProdukcja = 162840
+
+k [*] :=
+1    4.44089e-11
+2   22.438
+3  299.996
+4   99.9986
+;
+
+wielkoscProdukcji [*] :=
+1  126302
+;
+
+promocjaInternet [*] :=
+1  0.163404
+;
+
+promocjaMagazyny [*] :=
+1  0.13617
+;
+
+promocjaTelewizja [*] :=
+1  0.340426
+;
+
+kosztyZmienne = 969999
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -63.63173762
+docelowaProdukcja = 162840
+
+k [*] :=
+1   2.77556e-11
+2  25.4829
+3  53.0894
+4  21.2358
+;
+
+wielkoscProdukcji [*] :=
+1  121344
+;
+
+promocjaInternet [*] :=
+1  9451.71
+;
+
+promocjaMagazyny [*] :=
+1  8938.21
+;
+
+promocjaTelewizja [*] :=
+1  19691.1
+;
+
+kosztyZmienne = 931919
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+24 iterations, objective 0.02836600371
+docelowaProdukcja = 162840
+
+k [*] :=
+1   2.84495e-11
+2  25.5364
+3  49.1084
+4  19.6434
+;
+
+wielkoscProdukcji [*] :=
+1  121257
+;
+
+promocjaInternet [*] :=
+1  9642.79
+;
+
+promocjaMagazyny [*] :=
+1  9017.83
+;
+
+promocjaTelewizja [*] :=
+1  20089.2
+;
+
+kosztyZmienne = 931250
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -63.63173762
+docelowaProdukcja = 162840
+
+k [*] :=
+1   2.77556e-11
+2  25.4829
+3  53.0894
+4  21.2358
+;
+
+wielkoscProdukcji [*] :=
+1  121344
+;
+
+promocjaInternet [*] :=
+1  9451.71
+;
+
+promocjaMagazyny [*] :=
+1  8938.21
+;
+
+promocjaTelewizja [*] :=
+1  19691.1
+;
+
+kosztyZmienne = 931919
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -21.03062634
+docelowaProdukcja = 162840
+
+k [*] :=
+1   3.05311e-11
+2  25.5107
+3  51.0214
+4  20.4086
+;
+
+wielkoscProdukcji [*] :=
+1  121298
+;
+
+promocjaInternet [*] :=
+1  9550.97
+;
+
+promocjaMagazyny [*] :=
+1  8979.57
+;
+
+promocjaTelewizja [*] :=
+1  19897.9
+;
+
+kosztyZmienne = 931572
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+26 iterations, objective 0.09896840564
+docelowaProdukcja = 162840
+
+k [*] :=
+1  -2.498e-11
+2  25.6229
+3  45.7552
+4  15.2517
+;
+
+wielkoscProdukcji [*] :=
+1  121116
+;
+
+promocjaInternet [*] :=
+1  10169.8
+;
+
+promocjaMagazyny [*] :=
+1  8474.83
+;
+
+promocjaTelewizja [*] :=
+1  21187.1
+;
+
+kosztyZmienne = 930168
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -63.63173762
+docelowaProdukcja = 162840
+
+k [*] :=
+1   2.77556e-11
+2  25.4829
+3  53.0894
+4  21.2358
+;
+
+wielkoscProdukcji [*] :=
+1  121344
+;
+
+promocjaInternet [*] :=
+1  9451.71
+;
+
+promocjaMagazyny [*] :=
+1  8938.21
+;
+
+promocjaTelewizja [*] :=
+1  19691.1
+;
+
+kosztyZmienne = 931919
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -864.8070852
+docelowaProdukcja = 162840
+
+k [*] :=
+1  -6.10623e-11
+2  44.1511
+3  91.9814
+4  36.7926
+;
+
+wielkoscProdukcji [*] :=
+1  90944.4
+;
+
+promocjaInternet [*] :=
+1  7584.89
+;
+
+promocjaMagazyny [*] :=
+1  8160.37
+;
+
+promocjaTelewizja [*] :=
+1  15801.9
+;
+
+kosztyZmienne = 698453
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -864.8070852
+docelowaProdukcja = 162840
+
+k [*] :=
+1  -6.10623e-11
+2  44.1511
+3  91.9814
+4  36.7926
+;
+
+wielkoscProdukcji [*] :=
+1  90944.4
+;
+
+promocjaInternet [*] :=
+1  7584.89
+;
+
+promocjaMagazyny [*] :=
+1  8160.37
+;
+
+promocjaTelewizja [*] :=
+1  15801.9
+;
+
+kosztyZmienne = 698453
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -864.8070852
+docelowaProdukcja = 162840
+
+k [*] :=
+1  -6.10623e-11
+2  44.1511
+3  91.9814
+4  36.7926
+;
+
+wielkoscProdukcji [*] :=
+1  90944.4
+;
+
+promocjaInternet [*] :=
+1  7584.89
+;
+
+promocjaMagazyny [*] :=
+1  8160.37
+;
+
+promocjaTelewizja [*] :=
+1  15801.9
+;
+
+kosztyZmienne = 698453
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -864.8104234
+docelowaProdukcja = 162840
+
+k [*] :=
+1   9.4369e-11
+2  44.1512
+3  91.9816
+4  36.7926
+;
+
+wielkoscProdukcji [*] :=
+1  90944.3
+;
+
+promocjaInternet [*] :=
+1  7584.88
+;
+
+promocjaMagazyny [*] :=
+1  8160.37
+;
+
+promocjaTelewizja [*] :=
+1  15801.8
+;
+
+kosztyZmienne = 698452
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -864.8104234
+docelowaProdukcja = 162840
+
+k [*] :=
+1   9.4369e-11
+2  44.1512
+3  91.9816
+4  36.7926
+;
+
+wielkoscProdukcji [*] :=
+1  90944.3
+;
+
+promocjaInternet [*] :=
+1  7584.88
+;
+
+promocjaMagazyny [*] :=
+1  8160.37
+;
+
+promocjaTelewizja [*] :=
+1  15801.8
+;
+
+kosztyZmienne = 698452
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -864.8104234
+docelowaProdukcja = 162840
+
+k [*] :=
+1   9.4369e-11
+2  44.1512
+3  91.9816
+4  36.7926
+;
+
+wielkoscProdukcji [*] :=
+1  90944.3
+;
+
+promocjaInternet [*] :=
+1  7584.88
+;
+
+promocjaMagazyny [*] :=
+1  8160.37
+;
+
+promocjaTelewizja [*] :=
+1  15801.8
+;
+
+kosztyZmienne = 698452
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -864.8104234
+docelowaProdukcja = 162840
+
+k [*] :=
+1   9.4369e-11
+2  44.1512
+3  91.9816
+4  36.7926
+;
+
+wielkoscProdukcji [*] :=
+1  90944.3
+;
+
+promocjaInternet [*] :=
+1  7584.88
+;
+
+promocjaMagazyny [*] :=
+1  8160.37
+;
+
+promocjaTelewizja [*] :=
+1  15801.8
+;
+
+kosztyZmienne = 698452
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -864.8104234
+docelowaProdukcja = 162840
+
+k [*] :=
+1   9.4369e-11
+2  44.1512
+3  91.9816
+4  36.7926
+;
+
+wielkoscProdukcji [*] :=
+1  90944.3
+;
+
+promocjaInternet [*] :=
+1  7584.88
+;
+
+promocjaMagazyny [*] :=
+1  8160.37
+;
+
+promocjaTelewizja [*] :=
+1  15801.8
+;
+
+kosztyZmienne = 698452
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -864.8104234
+docelowaProdukcja = 162840
+
+k [*] :=
+1   9.4369e-11
+2  44.1512
+3  91.9816
+4  36.7926
+;
+
+wielkoscProdukcji [*] :=
+1  90944.3
+;
+
+promocjaInternet [*] :=
+1  7584.88
+;
+
+promocjaMagazyny [*] :=
+1  8160.37
+;
+
+promocjaTelewizja [*] :=
+1  15801.8
+;
+
+kosztyZmienne = 698452
+
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -918.2390057
+docelowaProdukcja = 162840
+
+k [*] :=
+1   4.996e-11
+2  45.3961
+3  94.5752
+4  37.8301
+;
+
+wielkoscProdukcji [*] :=
+1  88917
+;
+
+promocjaInternet [*] :=
+1  7460.39
+;
+
+promocjaMagazyny [*] :=
+1  8108.5
+;
+
+promocjaTelewizja [*] :=
+1  15542.5
+;
+
+kosztyZmienne = 698888
+
+
+a
+r
+celReklamy
+kosztyStale
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -918.2390057
+docelowaProdukcja = 162840
+
+k [*] :=
+1   4.996e-11
+2  45.3961
+3  94.5752
+4  37.8301
+;
+
+wielkoscProdukcji [*] :=
+1  88917
+;
+
+promocjaInternet [*] :=
+1  7460.39
+;
+
+promocjaMagazyny [*] :=
+1  8108.5
+;
+
+promocjaTelewizja [*] :=
+1  15542.5
+;
+
+kosztyZmienne = 698888
+
+
+{"a"=>["0", "0", "0", "0"], "r"=>["20000", "24", "50", "20"], "wspolczynnikReklamy"=>"0.1", "procentPopytu"=>"0.01", "celReklamy"=>["12000", "10000", "25000"], "eps"=>"0.01", "beta"=>"0.001", "gamma"=>"1000", "gotowka"=>"300000", "kredyt"=>"700000", "splacanaRata"=>"240001", "jakosc"=>"3", "kosztJednostkowy"=>"7.86", "cenaSprzedazy"=>"15", "popyt"=>"16284000", "N"=>"1", "kosztyStale"=>["5000", "15000"], "zdolnoscProdukcyjna"=>"400000", "amortyzacja"=>"10000"}
+a
+r
+celReklamy
+kosztyStale
+{"a"=>["0", "0", "0", "0"], "r"=>["20000", "24", "50", "20"], "wspolczynnikReklamy"=>["0.1"], "procentPopytu"=>["0.01"], "celReklamy"=>["12000", "10000", "25000"], "eps"=>["0.01"], "beta"=>["0.001"], "gamma"=>["1000"], "gotowka"=>["300000"], "kredyt"=>["700000"], "splacanaRata"=>["240001"], "jakosc"=>["3"], "kosztJednostkowy"=>["7.86"], "cenaSprzedazy"=>["15"], "popyt"=>["16284000"], "N"=>["1"], "kosztyStale"=>["5000", "15000"], "zdolnoscProdukcyjna"=>["400000"], "amortyzacja"=>["10000"]}
+a
+r
+wspolczynnikReklamy
+procentPopytu
+celReklamy
+eps
+beta
+gamma
+gotowka
+kredyt
+splacanaRata
+jakosc
+kosztJednostkowy
+cenaSprzedazy
+popyt
+N
+kosztyStale
+zdolnoscProdukcyjna
+amortyzacja
+{"a"=>["0", "0", "0", "0"], "r"=>["20000", "24", "50", "20"], "wspolczynnikReklamy"=>["0.1"], "procentPopytu"=>["0.01"], "celReklamy"=>["12000", "10000", "25000"], "eps"=>["0.01"], "beta"=>["0.001"], "gamma"=>["1000"], "gotowka"=>["300000"], "kredyt"=>["700000"], "splacanaRata"=>["240001"], "jakosc"=>["3"], "kosztJednostkowy"=>["7.86"], "cenaSprzedazy"=>["15"], "popyt"=>["16284000"], "N"=>["1"], "kosztyStale"=>["5000", "15000"], "zdolnoscProdukcyjna"=>["400000"], "amortyzacja"=>["10000"]}
+a
+r
+wspolczynnikReklamy
+procentPopytu
+celReklamy
+eps
+beta
+gamma
+gotowka
+kredyt
+splacanaRata
+jakosc
+kosztJednostkowy
+cenaSprzedazy
+popyt
+N
+kosztyStale
+zdolnoscProdukcyjna
+amortyzacja
+a
+r
+celReklamy
+kosztyStale
+
+expected ; 
+context:  1  >>> 0.1 <<< ;
+
+expected ; 
+context:  1  >>> 0.01 <<< ;
+
+expected ; 
+context:  1  >>> 0.01 <<< ;
+
+expected ; 
+context:  1  >>> 0.001 <<< ;
+
+expected ; 
+context:  1  >>> 1000 <<< ;
+
+expected ; 
+context:  1  >>> 300000 <<< ;
+
+expected ; 
+context:  1  >>> 700000 <<< ;
+
+expected ; 
+context:  1  >>> 240001 <<< ;
+
+expected ; 
+context:  1  >>> 16284000 <<< ;
+
+expected ; 
+context:  1  >>> 1 <<< ;
+
+Bailing out after 10 warnings.
+
+MINOS 5.51: ignoring integrality of 4 variables
+MINOS 5.51: optimal solution found.
+21 iterations, objective -918.2390057
+docelowaProdukcja = 162840
+
+k [*] :=
+1   4.996e-11
+2  45.3961
+3  94.5752
+4  37.8301
+;
+
+wielkoscProdukcji [*] :=
+1  88917
+;
+
+promocjaInternet [*] :=
+1  7460.39
+;
+
+promocjaMagazyny [*] :=
+1  8108.5
+;
+
+promocjaTelewizja [*] :=
+1  15542.5
+;
+
+kosztyZmienne = 698888
+
+

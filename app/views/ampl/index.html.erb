@@ -1,0 +1,14 @@
+<h5>stuffs</h5> 
+<div class="span6">
+  <%= form_tag('/ampl', :class => 'form-horizontal') do %>
+    <%= @inputs.html_safe() %>
+    <%= submit_tag('submit') %>
+
+  <% end %>
+</div>
+
+<div class="span5">
+  <pre>
+<%= @output %>
+  </pre>
+</div>
