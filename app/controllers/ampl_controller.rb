@@ -7,7 +7,6 @@ class AmplController < ApplicationController
       newmodel = subst(model, params["ampl"])
       write_model(newmodel)
       @output = invoke_ampl(newmodel)
-      log(@output)
     end
     @inputs = ampl_form
   end
@@ -59,8 +58,9 @@ class AmplController < ApplicationController
     model_params.each do |param|
       args = param[1]
       name = param[0]
+      type = param[2]
       @inputs << "<div class='control-group'>"
-      if args.size == 1
+      if type == 'scalar'
           @inputs << input_box(param[0], param[0], args)
       else
         args.each_with_index do |arg, i|
@@ -85,13 +85,30 @@ class AmplController < ApplicationController
 
   # Returns array of arrays (param, array of args)
   def model_params
-    params_string.split(';').map{|ss| ss.split(':=')}.reject do |el|
-      el.size != 2
-    end.map do |param|
-      name = param[0].split('param ').last
-      args = param[1].include?("\n") ? param[1].split("\n").map {|el| el.split(" ").last}.compact : [param[1]]
-      [name, args]
+    lst = params_string.split(';').map{|ss| ss.split(':=')}.reject {|el| el.size != 2}
+
+    lst.map do |param|
+      name = name(param[0])
+      args = args(param[1])
+      type = type(param[1])
+      [name, args, type]
     end
+  end
+
+  def name(str)
+    str.split('param ').last
+  end
+
+  def type(str)
+    if str.include?("\r\n")
+      "vector"
+    else
+      "scalar"
+    end
+  end
+
+  def args(str)
+    args = str.include?("\n") ? str.split("\n").map {|el| el.split(" ").last}.compact : [str]
   end
 
   def params_string

@@ -87,32 +87,32 @@ param r:=
 4 20;
 
 param wspolczynnikReklamy:=0.1;
-param procentPopytu:=0.01;
+param procentPopytu:=0.2;
 param celReklamy:=
-1 12000
-2 10000
-3 25000;
+1 2000
+2 24000
+3 40000;
 param eps:=0.01;
 param beta:=0.001;
 param gamma:=1000;
 
-param gotowka:=300000;
-param kredyt:=700000;
-param splacanaRata:=240001;
+param gotowka:=443000;
+param kredyt:=300000;
+param splacanaRata:=296000;
 param jakosc:=
-1 3;
+1 2;
 param kosztJednostkowy:=
-1 7.86;
+1 43648;
 param cenaSprzedazy:=
-1 15;
-param popyt:=16284000;
+1 60000;
+param popyt:=277;
 
 param N:=1;
 param kosztyStale:=
-1 5000
+1 0
 2 15000;
 param zdolnoscProdukcyjna:=
-1 400000;
+1 20000;
 param amortyzacja:=10000;
 
 
